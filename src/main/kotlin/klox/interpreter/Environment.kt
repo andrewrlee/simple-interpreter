@@ -1,6 +1,6 @@
-package klox
+package klox.interpreter
 
-import klox.Interpreter.RuntimeError
+import klox.interpreter.Interpreter.RuntimeError
 
 class Environment(private val enclosing: Environment? = null) {
     private val values = mutableMapOf<String, Any?>()

@@ -1,7 +1,8 @@
-package klox
+package klox.interpreter
 
-import klox.FunctionType.FUNCTION
-import klox.FunctionType.NONE
+import klox.Lox
+import klox.interpreter.FunctionType.FUNCTION
+import klox.interpreter.FunctionType.NONE
 import klox.ast.Expr
 import klox.ast.Expr.Assign
 import klox.ast.Expr.Binary

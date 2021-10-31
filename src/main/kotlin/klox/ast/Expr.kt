@@ -3,7 +3,7 @@
  */
 package klox.ast
 
-import klox.Token
+import klox.interpreter.Token
 
 sealed class Expr() {
     abstract fun <R> accept(visitor: Visitor<R>): R
@@ -19,15 +19,15 @@ sealed class Expr() {
         fun visit(expr: Unary): R
     }
 
-    data class Assign(val name: Token, val value: Expr) : Expr() { 
+    data class Assign(val name: Token, val value: Expr) : Expr() {
         override fun <R> accept(visitor: Visitor<R>) = visitor.visit(this) 
     }
 
-    data class Binary(val left: Expr, val operator: Token, val right: Expr) : Expr() { 
+    data class Binary(val left: Expr, val operator: Token, val right: Expr) : Expr() {
         override fun <R> accept(visitor: Visitor<R>) = visitor.visit(this) 
     }
 
-    data class Call(val callee: Expr, val paren: Token, val arguments: List<Expr>) : Expr() { 
+    data class Call(val callee: Expr, val paren: Token, val arguments: List<Expr>) : Expr() {
         override fun <R> accept(visitor: Visitor<R>) = visitor.visit(this) 
     }
 
@@ -39,15 +39,15 @@ sealed class Expr() {
         override fun <R> accept(visitor: Visitor<R>) = visitor.visit(this) 
     }
 
-    data class Logical(val left: Expr, val operator: Token, val right: Expr) : Expr() { 
+    data class Logical(val left: Expr, val operator: Token, val right: Expr) : Expr() {
         override fun <R> accept(visitor: Visitor<R>) = visitor.visit(this) 
     }
 
-    data class Variable(val name: Token) : Expr() { 
+    data class Variable(val name: Token) : Expr() {
         override fun <R> accept(visitor: Visitor<R>) = visitor.visit(this) 
     }
 
-    data class Unary(val operator: Token, val right: Expr) : Expr() { 
+    data class Unary(val operator: Token, val right: Expr) : Expr() {
         override fun <R> accept(visitor: Visitor<R>) = visitor.visit(this) 
     }
 }

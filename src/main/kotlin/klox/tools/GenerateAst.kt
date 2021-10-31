@@ -11,7 +11,7 @@ fun defineAst(outputDir: String, baseName: String, types: List<String>) = File("
  */
 package klox.ast
 
-import klox.Token
+import klox.interpreter.Token
 
 sealed class $baseName() {
     abstract fun <R> accept(visitor: Visitor<R>): R

@@ -1,28 +1,29 @@
-package klox
+package klox.interpreter
 
-import klox.TokenType.BANG
-import klox.TokenType.BANG_EQUAL
-import klox.TokenType.COMMA
-import klox.TokenType.DOT
-import klox.TokenType.EOF
-import klox.TokenType.EQUAL
-import klox.TokenType.EQUAL_EQUAL
-import klox.TokenType.GREATER
-import klox.TokenType.GREATER_EQUAL
-import klox.TokenType.IDENTIFIER
-import klox.TokenType.LEFT_BRACE
-import klox.TokenType.LEFT_PAREN
-import klox.TokenType.LESS
-import klox.TokenType.LESS_EQUAL
-import klox.TokenType.MINUS
-import klox.TokenType.NUMBER
-import klox.TokenType.PLUS
-import klox.TokenType.RIGHT_BRACE
-import klox.TokenType.RIGHT_PAREN
-import klox.TokenType.SEMICOLON
-import klox.TokenType.SLASH
-import klox.TokenType.STAR
-import klox.TokenType.STRING
+import klox.Lox
+import klox.interpreter.TokenType.BANG
+import klox.interpreter.TokenType.BANG_EQUAL
+import klox.interpreter.TokenType.COMMA
+import klox.interpreter.TokenType.DOT
+import klox.interpreter.TokenType.EOF
+import klox.interpreter.TokenType.EQUAL
+import klox.interpreter.TokenType.EQUAL_EQUAL
+import klox.interpreter.TokenType.GREATER
+import klox.interpreter.TokenType.GREATER_EQUAL
+import klox.interpreter.TokenType.IDENTIFIER
+import klox.interpreter.TokenType.LEFT_BRACE
+import klox.interpreter.TokenType.LEFT_PAREN
+import klox.interpreter.TokenType.LESS
+import klox.interpreter.TokenType.LESS_EQUAL
+import klox.interpreter.TokenType.MINUS
+import klox.interpreter.TokenType.NUMBER
+import klox.interpreter.TokenType.PLUS
+import klox.interpreter.TokenType.RIGHT_BRACE
+import klox.interpreter.TokenType.RIGHT_PAREN
+import klox.interpreter.TokenType.SEMICOLON
+import klox.interpreter.TokenType.SLASH
+import klox.interpreter.TokenType.STAR
+import klox.interpreter.TokenType.STRING
 
 class Scanner(private val source: String) {
     private val tokens: MutableList<Token> = mutableListOf()

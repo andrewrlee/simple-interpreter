@@ -1,4 +1,4 @@
-package klox
+package klox.interpreter
 
 enum class TokenType {
     // Single char tokens

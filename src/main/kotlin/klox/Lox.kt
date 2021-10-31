@@ -1,7 +1,12 @@
 package klox
 
-import klox.Interpreter.RuntimeError
-import klox.TokenType.EOF
+import klox.interpreter.Interpreter.RuntimeError
+import klox.interpreter.TokenType.EOF
+import klox.interpreter.Interpreter
+import klox.interpreter.Parser
+import klox.interpreter.Resolver
+import klox.interpreter.Scanner
+import klox.interpreter.Token
 import java.io.File
 import java.nio.charset.Charset
 import kotlin.system.exitProcess

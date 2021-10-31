@@ -1,4 +1,4 @@
-package klox
+package klox.interpreter
 
 import klox.ast.Stmt
 

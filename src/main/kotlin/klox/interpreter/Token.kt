@@ -1,4 +1,4 @@
-package klox
+package klox.interpreter
 
 class Token(
     val type: TokenType,

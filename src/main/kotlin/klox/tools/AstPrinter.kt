@@ -3,9 +3,9 @@ package klox.tools
 import klox.ast.Expr
 import klox.ast.Expr.Binary
 import klox.ast.Expr.*
-import klox.Token
-import klox.TokenType.MINUS
-import klox.TokenType.STAR
+import klox.interpreter.Token
+import klox.interpreter.TokenType.MINUS
+import klox.interpreter.TokenType.STAR
 
 class AstPrinter : Visitor<String> {
     fun print(expression: Expr) = expression.accept(this)

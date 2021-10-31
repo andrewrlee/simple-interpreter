@@ -3,7 +3,7 @@
  */
 package klox.ast
 
-import klox.Token
+import klox.interpreter.Token
 
 sealed class Stmt() {
     abstract fun <R> accept(visitor: Visitor<R>): R
@@ -27,7 +27,7 @@ sealed class Stmt() {
         override fun <R> accept(visitor: Visitor<R>) = visitor.visit(this) 
     }
 
-    data class Function(val name: Token, val params: List<Token>, val body: List<Stmt>) : Stmt() { 
+    data class Function(val name: Token, val params: List<Token>, val body: List<Stmt>) : Stmt() {
         override fun <R> accept(visitor: Visitor<R>) = visitor.visit(this) 
     }
 
@@ -39,7 +39,7 @@ sealed class Stmt() {
         override fun <R> accept(visitor: Visitor<R>) = visitor.visit(this) 
     }
 
-    data class Return(val keyword: Token, val value: Expr?) : Stmt() { 
+    data class Return(val keyword: Token, val value: Expr?) : Stmt() {
         override fun <R> accept(visitor: Visitor<R>) = visitor.visit(this) 
     }
 
@@ -47,7 +47,7 @@ sealed class Stmt() {
         override fun <R> accept(visitor: Visitor<R>) = visitor.visit(this) 
     }
 
-    data class Var(val name: Token, val initializer: Expr?) : Stmt() { 
+    data class Var(val name: Token, val initializer: Expr?) : Stmt() {
         override fun <R> accept(visitor: Visitor<R>) = visitor.visit(this) 
     }
 }
