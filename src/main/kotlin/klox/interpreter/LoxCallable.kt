@@ -10,7 +10,11 @@ interface LoxCallable {
 
 class Return(val value: Any?) : RuntimeException(null, null, false, false)
 
-class LoxFunction(private val declaration: Stmt.Function, private val closure: Environment) : LoxCallable {
+class LoxFunction(
+    private val declaration: Stmt.Function,
+    private val closure: Environment,
+    private val isInitializer: Boolean = false
+) : LoxCallable {
 
     override fun call(interpreter: Interpreter, args: List<Any?>): Any? {
         val environment = Environment(closure)
@@ -18,19 +22,28 @@ class LoxFunction(private val declaration: Stmt.Function, private val closure: E
         try {
             interpreter.executeBlock(declaration.body, environment)
         } catch (ret: Return) {
-            return ret.value
+            return if (isInitializer) closure.getAt(0, "this") else ret.value
         }
-        return null
+        return if (isInitializer) return closure.getAt(0, "this") else null
     }
 
     override fun arity() = declaration.params.size
+
+    fun bind(instance: LoxInstance): LoxFunction {
+        val environment = Environment(closure)
+        environment.define("this", instance)
+        return LoxFunction(declaration, environment, isInitializer)
+    }
 
     override fun toString() = "<fn ${declaration.name.lexeme}>"
 }
 
 class LoxClass(val name: String, val methods: Map<String, LoxFunction>) : LoxCallable {
-    override fun call(interpreter: Interpreter, args: List<Any?>): Any? {
+    override fun call(interpreter: Interpreter, args: List<Any?>): Any {
         val instance = LoxInstance(this)
+
+        findMethod("init")?.bind(instance)?.call(interpreter, args)
+
         return instance
     }
 
@@ -42,9 +55,7 @@ class LoxClass(val name: String, val methods: Map<String, LoxFunction>) : LoxCal
         return null
     }
 
-    override fun arity(): Int {
-        return 0
-    }
+    override fun arity() = findMethod("init")?.arity() ?: 0
 
     override fun toString() = name
 }
@@ -55,13 +66,13 @@ class LoxInstance(private val loxClass: LoxClass) {
 
     operator fun get(key: Token): Any? {
         if (fields.containsKey(key.lexeme)) {
-            fields[key.lexeme]
+            return fields[key.lexeme]
         }
-        loxClass.findMethod(key.lexeme)?.let { return it }
+        loxClass.findMethod(key.lexeme)?.let { return it.bind(this) }
         throw RuntimeError(key, "Undefined property '${key.lexeme}'.")
     }
 
     operator fun set(name: Token, value: Any?) {
-        fields.put(name.lexeme, value)
+        fields[name.lexeme] = value
     }
 }

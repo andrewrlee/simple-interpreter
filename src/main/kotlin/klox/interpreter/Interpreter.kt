@@ -31,6 +31,7 @@ import klox.interpreter.TokenType.OR
 import klox.interpreter.TokenType.PLUS
 import klox.interpreter.TokenType.SLASH
 import klox.interpreter.TokenType.STAR
+import kotlin.math.exp
 
 class Interpreter : Visitor<Any?>, Stmt.Visitor<Unit> {
     class RuntimeError(val token: Token, message: String) : RuntimeException(message)
@@ -108,6 +109,8 @@ class Interpreter : Visitor<Any?>, Stmt.Visitor<Unit> {
         return value
     }
 
+    override fun visit(expr: Expr.This) = lookupVariable(expr.keyword, expr)
+
     override fun visit(expr: Grouping) = evaluate(expr.expression)
 
     override fun visit(expr: Literal) = expr.value
@@ -139,10 +142,10 @@ class Interpreter : Visitor<Any?>, Stmt.Visitor<Unit> {
 
     override fun visit(expr: Variable) = lookupVariable(expr.name, expr)
 
-    private fun lookupVariable(name: Token, expr: Variable): Any? {
+    private fun lookupVariable(name: Token, expr: Expr): Any? {
         val distance = locals[expr]
         return if (distance != null) {
-            environment.getAt(distance, name)
+            environment.getAt(distance, name.lexeme)
         } else {
             globals[name]
         }
@@ -214,7 +217,7 @@ class Interpreter : Visitor<Any?>, Stmt.Visitor<Unit> {
 
     override fun visit(stmt: Stmt.Class) {
         environment.define(stmt.name.lexeme, null)
-        val methods = stmt.methods.associate { it.name.lexeme to LoxFunction(it, environment) }
+        val methods = stmt.methods.associate { it.name.lexeme to LoxFunction(it, environment, it.name.lexeme == "init") }
         environment.assign(stmt.name, LoxClass(stmt.name.lexeme, methods))
     }
 

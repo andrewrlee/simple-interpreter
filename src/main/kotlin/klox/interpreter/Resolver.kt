@@ -2,7 +2,16 @@ package klox.interpreter
 
 import klox.Lox
 import klox.ast.Expr
-import klox.ast.Expr.*
+import klox.ast.Expr.Assign
+import klox.ast.Expr.Binary
+import klox.ast.Expr.Call
+import klox.ast.Expr.Get
+import klox.ast.Expr.Grouping
+import klox.ast.Expr.Literal
+import klox.ast.Expr.Logical
+import klox.ast.Expr.Unary
+import klox.ast.Expr.Variable
+import klox.ast.Expr.Visitor
 import klox.ast.Stmt
 import klox.ast.Stmt.Block
 import klox.ast.Stmt.Expression
@@ -11,16 +20,17 @@ import klox.ast.Stmt.Print
 import klox.ast.Stmt.Var
 import klox.ast.Stmt.While
 import klox.interpreter.FunctionType.FUNCTION
+import klox.interpreter.FunctionType.INITIALIZER
 import klox.interpreter.FunctionType.METHOD
-import klox.interpreter.FunctionType.NONE
 import java.util.Stack
-import kotlin.math.exp
 
-enum class FunctionType { NONE, FUNCTION, METHOD }
+enum class FunctionType { NONE, FUNCTION, INITIALIZER, METHOD }
+enum class ClassType { NONE, CLASS }
 
 class Resolver(private val interpreter: Interpreter) : Visitor<Unit>, Stmt.Visitor<Unit> {
     private val scopes = Stack<HashMap<String, Boolean>>()
     private var currentFunctionType = FunctionType.NONE
+    private var currentClassType = ClassType.NONE
 
     override fun visit(expr: Assign) {
         resolve(expr.value)
@@ -38,6 +48,14 @@ class Resolver(private val interpreter: Interpreter) : Visitor<Unit>, Stmt.Visit
     override fun visit(expr: Logical) = resolve(expr.left, expr.right)
 
     override fun visit(expr: Expr.Set) = resolve(expr.value, expr.obj)
+
+    override fun visit(expr: Expr.This) {
+        if (currentClassType == ClassType.NONE) {
+            Lox.error(expr.keyword, "Can't refer to 'this' outside of a class.")
+            return
+        }
+        resolveLocal(expr, expr.keyword)
+    }
 
     override fun visit(expr: Variable) {
         if (!scopes.isEmpty() && scopes.peek()[expr.name.lexeme] == false) {
@@ -59,9 +77,21 @@ class Resolver(private val interpreter: Interpreter) : Visitor<Unit>, Stmt.Visit
     override fun visit(stmt: Expression) = resolve(stmt.expression)
 
     override fun visit(stmt: Stmt.Class) {
+        val enclosingClassType = currentClassType
+        currentClassType = ClassType.CLASS
+
         declare(stmt.name)
-        stmt.methods.forEach { resolveFunction(it, METHOD) }
         define(stmt.name)
+        beginScope()
+        scopes.peek()["this"] = true
+        stmt.methods.forEach {
+            var declaration = METHOD
+            if (it.name.lexeme == "init") declaration = INITIALIZER
+            resolveFunction(it, declaration)
+        }
+        endScope()
+
+        currentClassType = enclosingClassType
     }
 
     override fun visit(stmt: Stmt.Function) {
@@ -78,10 +108,15 @@ class Resolver(private val interpreter: Interpreter) : Visitor<Unit>, Stmt.Visit
     override fun visit(stmt: Print) = resolve(stmt.expression)
 
     override fun visit(stmt: Stmt.Return) {
-        if (currentFunctionType == NONE) {
+        if (currentFunctionType == FunctionType.NONE) {
             Lox.error(stmt.keyword, "Can't return from top level code.")
         }
-        stmt.value?.let { resolve(it) }
+        stmt.value?.let {
+            if (currentFunctionType == INITIALIZER) {
+                Lox.error(stmt.keyword, "Can't return a value from an initializer.")
+            }
+            resolve(it)
+        }
     }
 
     override fun visit(stmt: While) {
@@ -141,3 +176,4 @@ class Resolver(private val interpreter: Interpreter) : Visitor<Unit>, Stmt.Visit
     }
 
 }
+

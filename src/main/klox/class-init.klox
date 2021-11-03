@@ -1,0 +1,12 @@
+
+class Cake {
+  init(){
+     print("Init");
+     return;
+  }
+}
+
+var cake = Cake();
+var a = cake.init();
+
+print(a);

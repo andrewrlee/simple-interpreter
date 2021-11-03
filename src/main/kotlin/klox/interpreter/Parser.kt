@@ -2,50 +2,9 @@ package klox.interpreter
 
 import klox.Lox
 import klox.ast.Expr
-import klox.ast.Expr.Assign
-import klox.ast.Expr.Binary
-import klox.ast.Expr.Grouping
-import klox.ast.Expr.Literal
-import klox.ast.Expr.Unary
-import klox.ast.Expr.Variable
+import klox.ast.Expr.*
 import klox.ast.Stmt
-import klox.interpreter.TokenType.AND
-import klox.interpreter.TokenType.BANG
-import klox.interpreter.TokenType.BANG_EQUAL
-import klox.interpreter.TokenType.CLASS
-import klox.interpreter.TokenType.COMMA
-import klox.interpreter.TokenType.DOT
-import klox.interpreter.TokenType.ELSE
-import klox.interpreter.TokenType.EOF
-import klox.interpreter.TokenType.EQUAL
-import klox.interpreter.TokenType.EQUAL_EQUAL
-import klox.interpreter.TokenType.FALSE
-import klox.interpreter.TokenType.FOR
-import klox.interpreter.TokenType.FUN
-import klox.interpreter.TokenType.GREATER
-import klox.interpreter.TokenType.GREATER_EQUAL
-import klox.interpreter.TokenType.IDENTIFIER
-import klox.interpreter.TokenType.IF
-import klox.interpreter.TokenType.LEFT_BRACE
-import klox.interpreter.TokenType.LEFT_PAREN
-import klox.interpreter.TokenType.LESS
-import klox.interpreter.TokenType.LESS_EQUAL
-import klox.interpreter.TokenType.MINUS
-import klox.interpreter.TokenType.NIL
-import klox.interpreter.TokenType.NUMBER
-import klox.interpreter.TokenType.OR
-import klox.interpreter.TokenType.PLUS
-import klox.interpreter.TokenType.PRINT
-import klox.interpreter.TokenType.RETURN
-import klox.interpreter.TokenType.RIGHT_BRACE
-import klox.interpreter.TokenType.RIGHT_PAREN
-import klox.interpreter.TokenType.SEMICOLON
-import klox.interpreter.TokenType.SLASH
-import klox.interpreter.TokenType.STAR
-import klox.interpreter.TokenType.STRING
-import klox.interpreter.TokenType.TRUE
-import klox.interpreter.TokenType.VAR
-import klox.interpreter.TokenType.WHILE
+import klox.interpreter.TokenType.*
 
 class ParserError : RuntimeException()
 
@@ -213,7 +172,7 @@ class Parser(private val tokens: List<Token>) {
             val value = assignment()
             when (expr) {
                 is Variable -> return Assign(expr.name, value)
-                is Expr.Get -> return Expr.Set(expr.obj, expr.name, value)
+                is Get -> return Set(expr.obj, expr.name, value)
                 else -> error(equals, "Invalid assignment target.")
             }
         }
@@ -250,7 +209,7 @@ class Parser(private val tokens: List<Token>) {
                 expr = finishCall(expr)
             } else if (match(DOT)) {
                 val name = consume(IDENTIFIER, "Expect property name after '.'.")
-                expr = Expr.Get(expr, name)
+                expr = Get(expr, name)
 
             } else {
                 break;
@@ -271,7 +230,7 @@ class Parser(private val tokens: List<Token>) {
             error(peek(), "Can't have 255 or more arguments")
         }
         val paren = consume(RIGHT_PAREN, "Expect ')' after arguments")
-        return Expr.Call(callee, paren, args)
+        return Call(callee, paren, args)
     }
 
     private fun primary(): Expr {
@@ -279,6 +238,7 @@ class Parser(private val tokens: List<Token>) {
         if (match(TRUE)) return Literal(true)
         if (match(NIL)) return Literal(null)
         if (match(NUMBER, STRING)) return Literal(previous().literal)
+        if (match(THIS)) return This(previous())
         if (match(IDENTIFIER)) return Variable(previous())
 
         if (match(LEFT_PAREN)) {

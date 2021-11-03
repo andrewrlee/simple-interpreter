@@ -26,17 +26,13 @@ class AstPrinter : Visitor<String> {
 
     override fun visit(expr: Logical) = parenthesize(expr.operator.lexeme, expr.left, expr.right)
 
-    override fun visit(expr: Call): String {
-        TODO("Not yet implemented")
-    }
+    override fun visit(expr: Call) = parenthesize("call", expr.callee)
 
-    override fun visit(expr: Get): String {
-        TODO("Not yet implemented")
-    }
+    override fun visit(expr: Get): String = parenthesize("get", expr.obj)
 
-    override fun visit(expr: Expr.Set): String {
-        TODO("Not yet implemented")
-    }
+    override fun visit(expr: Expr.Set) = parenthesize("set", expr.value)
+
+    override fun visit(expr: This) = "this"
 }
 
 fun main() {
