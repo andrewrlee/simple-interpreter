@@ -29,6 +29,14 @@ class AstPrinter : Visitor<String> {
     override fun visit(expr: Call): String {
         TODO("Not yet implemented")
     }
+
+    override fun visit(expr: Get): String {
+        TODO("Not yet implemented")
+    }
+
+    override fun visit(expr: Expr.Set): String {
+        TODO("Not yet implemented")
+    }
 }
 
 fun main() {

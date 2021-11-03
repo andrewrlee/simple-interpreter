@@ -1,11 +1,20 @@
 package klox.interpreter
 
 import klox.Lox
+import klox.ast.Expr
+import klox.ast.Expr.Assign
+import klox.ast.Expr.Binary
+import klox.ast.Expr.Grouping
+import klox.ast.Expr.Literal
+import klox.ast.Expr.Unary
+import klox.ast.Expr.Variable
+import klox.ast.Stmt
 import klox.interpreter.TokenType.AND
 import klox.interpreter.TokenType.BANG
 import klox.interpreter.TokenType.BANG_EQUAL
 import klox.interpreter.TokenType.CLASS
 import klox.interpreter.TokenType.COMMA
+import klox.interpreter.TokenType.DOT
 import klox.interpreter.TokenType.ELSE
 import klox.interpreter.TokenType.EOF
 import klox.interpreter.TokenType.EQUAL
@@ -37,14 +46,6 @@ import klox.interpreter.TokenType.STRING
 import klox.interpreter.TokenType.TRUE
 import klox.interpreter.TokenType.VAR
 import klox.interpreter.TokenType.WHILE
-import klox.ast.Expr
-import klox.ast.Expr.Assign
-import klox.ast.Expr.Binary
-import klox.ast.Expr.Grouping
-import klox.ast.Expr.Literal
-import klox.ast.Expr.Unary
-import klox.ast.Expr.Variable
-import klox.ast.Stmt
 
 class ParserError : RuntimeException()
 
@@ -62,6 +63,7 @@ class Parser(private val tokens: List<Token>) {
     private fun declaration(): Stmt? {
         return try {
             when {
+                match(CLASS) -> classDeclaration()
                 match(FUN) -> function("function")
                 match(VAR) -> varDeclaration()
                 else -> statement()
@@ -72,7 +74,19 @@ class Parser(private val tokens: List<Token>) {
         }
     }
 
-    private fun function(kind: String): Stmt {
+    private fun classDeclaration(): Stmt {
+        val name = consume(IDENTIFIER, "Expect class name.")
+        consume(LEFT_BRACE, "Expect '{' before class body.")
+        val methods = mutableListOf<Stmt.Function>()
+        while (!check(RIGHT_BRACE) && !isAtEnd()) {
+            methods.add(function("method"))
+        }
+        consume(RIGHT_BRACE, "Expect '}' after class body.")
+
+        return Stmt.Class(name, methods)
+    }
+
+    private fun function(kind: String): Stmt.Function {
         val name = consume(IDENTIFIER, "Expect $kind name.")
         consume(LEFT_PAREN, "Expect '(' after $kind name.")
         val params = mutableListOf<Token>()
@@ -197,10 +211,11 @@ class Parser(private val tokens: List<Token>) {
         if (match(EQUAL)) {
             val equals = previous()
             val value = assignment()
-            if (expr is Variable) {
-                return Assign(expr.name, value)
+            when (expr) {
+                is Variable -> return Assign(expr.name, value)
+                is Expr.Get -> return Expr.Set(expr.obj, expr.name, value)
+                else -> error(equals, "Invalid assignment target.")
             }
-            error(equals, "Invalid assignment target.")
         }
 
         return expr
@@ -233,6 +248,10 @@ class Parser(private val tokens: List<Token>) {
         while (true) {
             if (match(LEFT_PAREN)) {
                 expr = finishCall(expr)
+            } else if (match(DOT)) {
+                val name = consume(IDENTIFIER, "Expect property name after '.'.")
+                expr = Expr.Get(expr, name)
+
             } else {
                 break;
             }
@@ -301,7 +320,8 @@ class Parser(private val tokens: List<Token>) {
         }
     }
 
-    private fun consume(type: TokenType, message: String) = if (check(type)) advance() else throw error(peek(), message)
+    private fun consume(type: TokenType, message: String) =
+        if (check(type)) advance() else throw error(peek(), message)
 
     private fun error(token: Token, message: String): ParserError {
         Lox.error(token, message)

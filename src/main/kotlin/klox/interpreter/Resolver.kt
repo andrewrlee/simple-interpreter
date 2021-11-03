@@ -1,18 +1,8 @@
 package klox.interpreter
 
 import klox.Lox
-import klox.interpreter.FunctionType.FUNCTION
-import klox.interpreter.FunctionType.NONE
 import klox.ast.Expr
-import klox.ast.Expr.Assign
-import klox.ast.Expr.Binary
-import klox.ast.Expr.Call
-import klox.ast.Expr.Grouping
-import klox.ast.Expr.Literal
-import klox.ast.Expr.Logical
-import klox.ast.Expr.Unary
-import klox.ast.Expr.Variable
-import klox.ast.Expr.Visitor
+import klox.ast.Expr.*
 import klox.ast.Stmt
 import klox.ast.Stmt.Block
 import klox.ast.Stmt.Expression
@@ -20,9 +10,13 @@ import klox.ast.Stmt.If
 import klox.ast.Stmt.Print
 import klox.ast.Stmt.Var
 import klox.ast.Stmt.While
+import klox.interpreter.FunctionType.FUNCTION
+import klox.interpreter.FunctionType.METHOD
+import klox.interpreter.FunctionType.NONE
 import java.util.Stack
+import kotlin.math.exp
 
-enum class FunctionType { NONE, FUNCTION }
+enum class FunctionType { NONE, FUNCTION, METHOD }
 
 class Resolver(private val interpreter: Interpreter) : Visitor<Unit>, Stmt.Visitor<Unit> {
     private val scopes = Stack<HashMap<String, Boolean>>()
@@ -43,12 +37,16 @@ class Resolver(private val interpreter: Interpreter) : Visitor<Unit>, Stmt.Visit
 
     override fun visit(expr: Logical) = resolve(expr.left, expr.right)
 
+    override fun visit(expr: Expr.Set) = resolve(expr.value, expr.obj)
+
     override fun visit(expr: Variable) {
         if (!scopes.isEmpty() && scopes.peek()[expr.name.lexeme] == false) {
             Lox.error(expr.name, "Can't read local variable in its own initialiser.")
         }
         resolveLocal(expr, expr.name)
     }
+
+    override fun visit(expr: Get) = resolve(expr.obj)
 
     override fun visit(expr: Unary) = resolve(expr.right)
 
@@ -59,6 +57,12 @@ class Resolver(private val interpreter: Interpreter) : Visitor<Unit>, Stmt.Visit
     }
 
     override fun visit(stmt: Expression) = resolve(stmt.expression)
+
+    override fun visit(stmt: Stmt.Class) {
+        declare(stmt.name)
+        stmt.methods.forEach { resolveFunction(it, METHOD) }
+        define(stmt.name)
+    }
 
     override fun visit(stmt: Stmt.Function) {
         declare(stmt.name)
@@ -135,4 +139,5 @@ class Resolver(private val interpreter: Interpreter) : Visitor<Unit>, Stmt.Visit
         }
         scope[name.lexeme] = false
     }
+
 }

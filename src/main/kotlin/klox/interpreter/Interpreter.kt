@@ -1,18 +1,6 @@
 package klox.interpreter
 
 import klox.Lox
-import klox.interpreter.TokenType.BANG
-import klox.interpreter.TokenType.BANG_EQUAL
-import klox.interpreter.TokenType.EQUAL_EQUAL
-import klox.interpreter.TokenType.GREATER
-import klox.interpreter.TokenType.GREATER_EQUAL
-import klox.interpreter.TokenType.LESS
-import klox.interpreter.TokenType.LESS_EQUAL
-import klox.interpreter.TokenType.MINUS
-import klox.interpreter.TokenType.OR
-import klox.interpreter.TokenType.PLUS
-import klox.interpreter.TokenType.SLASH
-import klox.interpreter.TokenType.STAR
 import klox.ast.Expr
 import klox.ast.Expr.Assign
 import klox.ast.Expr.Binary
@@ -30,12 +18,25 @@ import klox.ast.Stmt.If
 import klox.ast.Stmt.Print
 import klox.ast.Stmt.Var
 import klox.ast.Stmt.While
+import klox.interpreter.TokenType.AND
+import klox.interpreter.TokenType.BANG
+import klox.interpreter.TokenType.BANG_EQUAL
+import klox.interpreter.TokenType.EQUAL_EQUAL
+import klox.interpreter.TokenType.GREATER
+import klox.interpreter.TokenType.GREATER_EQUAL
+import klox.interpreter.TokenType.LESS
+import klox.interpreter.TokenType.LESS_EQUAL
+import klox.interpreter.TokenType.MINUS
+import klox.interpreter.TokenType.OR
+import klox.interpreter.TokenType.PLUS
+import klox.interpreter.TokenType.SLASH
+import klox.interpreter.TokenType.STAR
 
-class Interpreter() : Visitor<Any?>, Stmt.Visitor<Unit> {
+class Interpreter : Visitor<Any?>, Stmt.Visitor<Unit> {
     class RuntimeError(val token: Token, message: String) : RuntimeException(message)
 
     private val locals = mutableMapOf<Expr, Int>()
-    val globals = Environment()
+    private val globals = Environment()
     var environment = globals
 
     init {
@@ -52,9 +53,7 @@ class Interpreter() : Visitor<Any?>, Stmt.Visitor<Unit> {
         Lox.runtimeError(e)
     }
 
-    private fun execute(stmt: Stmt) {
-        stmt.accept(this)
-    }
+    private fun execute(stmt: Stmt) = stmt.accept(this)
 
     override fun visit(expr: Binary): Any? {
         val left = evaluate(expr.left)
@@ -91,12 +90,22 @@ class Interpreter() : Visitor<Any?>, Stmt.Visitor<Unit> {
     override fun visit(expr: Logical): Any? {
         val left = evaluate(expr.left)
 
-        if (expr.operator.type == OR) {
-            if (isTruthy(left)) return left
-        } else {
-            if (!isTruthy(left)) return left
+        when (expr.operator.type) {
+            OR -> if (isTruthy(left)) return left
+            AND -> if (!isTruthy(left)) return left
+            else -> throw RuntimeError(expr.operator, "Boolean operands should be AND/OR")
         }
         return evaluate(expr.right)
+    }
+
+    override fun visit(expr: Expr.Set): Any? {
+        val obj = evaluate(expr.obj)
+        if (obj !is LoxInstance) {
+            throw RuntimeError(expr.name, "Only instances have fields.")
+        }
+        val value = evaluate(expr.value)
+        obj[expr.name] = value
+        return value
     }
 
     override fun visit(expr: Grouping) = evaluate(expr.expression)
@@ -155,9 +164,7 @@ class Interpreter() : Visitor<Any?>, Stmt.Visitor<Unit> {
         return value
     }
 
-    override fun visit(stmt: Block) {
-        executeBlock(stmt.statements, Environment(environment))
-    }
+    override fun visit(stmt: Block) = executeBlock(stmt.statements, Environment(environment))
 
     fun executeBlock(statements: List<Stmt>, environment: Environment) {
         val previous = this.environment
@@ -194,9 +201,21 @@ class Interpreter() : Visitor<Any?>, Stmt.Visitor<Unit> {
         return callee.call(this, arguments)
     }
 
+    override fun visit(expr: Expr.Get): Any? {
+        val obj = evaluate(expr.obj)
+        return if (obj is LoxInstance) obj[expr.name]
+        else throw RuntimeError(expr.name, "Only instances have properties.")
+    }
+
     override fun visit(stmt: Stmt.Function) {
         val function = LoxFunction(stmt, environment)
         environment.define(stmt.name.lexeme, function)
+    }
+
+    override fun visit(stmt: Stmt.Class) {
+        environment.define(stmt.name.lexeme, null)
+        val methods = stmt.methods.associate { it.name.lexeme to LoxFunction(it, environment) }
+        environment.assign(stmt.name, LoxClass(stmt.name.lexeme, methods))
     }
 
     override fun visit(stmt: Stmt.Return) {
@@ -214,8 +233,8 @@ class Interpreter() : Visitor<Any?>, Stmt.Visitor<Unit> {
         val LESS_THAN = { v1: Double, v2: Double -> v1 < v2 }
         val LESS_THAN_EQUALS = { v1: Double, v2: Double -> v1 <= v2 }
 
-        private fun isTruthy(right: Any?) = when (right) {
-            is Boolean -> right
+        private fun isTruthy(value: Any?) = when (value) {
+            is Boolean -> value
             null -> false
             else -> true
         }
