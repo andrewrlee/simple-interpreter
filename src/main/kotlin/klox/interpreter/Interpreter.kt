@@ -31,7 +31,6 @@ import klox.interpreter.TokenType.OR
 import klox.interpreter.TokenType.PLUS
 import klox.interpreter.TokenType.SLASH
 import klox.interpreter.TokenType.STAR
-import kotlin.math.exp
 
 class Interpreter : Visitor<Any?>, Stmt.Visitor<Unit> {
     class RuntimeError(val token: Token, message: String) : RuntimeException(message)
@@ -216,9 +215,17 @@ class Interpreter : Visitor<Any?>, Stmt.Visitor<Unit> {
     }
 
     override fun visit(stmt: Stmt.Class) {
+        val superclass = stmt.superclass?.let {
+            evaluate(it)
+        }?.let {
+            if (it !is LoxClass) throw RuntimeError(stmt.superclass.name, "super class must be a class")
+            it
+        }
+
         environment.define(stmt.name.lexeme, null)
-        val methods = stmt.methods.associate { it.name.lexeme to LoxFunction(it, environment, it.name.lexeme == "init") }
-        environment.assign(stmt.name, LoxClass(stmt.name.lexeme, methods))
+        val methods =
+            stmt.methods.associate { it.name.lexeme to LoxFunction(it, environment, it.name.lexeme == "init") }
+        environment.assign(stmt.name, LoxClass(stmt.name.lexeme, superclass, methods))
     }
 
     override fun visit(stmt: Stmt.Return) {

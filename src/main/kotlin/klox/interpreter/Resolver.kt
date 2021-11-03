@@ -82,6 +82,14 @@ class Resolver(private val interpreter: Interpreter) : Visitor<Unit>, Stmt.Visit
 
         declare(stmt.name)
         define(stmt.name)
+
+        stmt.superclass?.let {
+            if (it.name.lexeme == stmt.name.lexeme) {
+                Lox.error(it.name, "A class can't inherit from itself.")
+            }
+            resolve(it)
+        }
+
         beginScope()
         scopes.peek()["this"] = true
         stmt.methods.forEach {
