@@ -38,7 +38,7 @@ class LoxFunction(
     override fun toString() = "<fn ${declaration.name.lexeme}>"
 }
 
-class LoxClass(val name: String, val superclass: LoxClass?, val methods: Map<String, LoxFunction>) : LoxCallable {
+class LoxClass(val name: String, private val superclass: LoxClass?, private val methods: Map<String, LoxFunction>) : LoxCallable {
     override fun call(interpreter: Interpreter, args: List<Any?>): Any {
         val instance = LoxInstance(this)
 
@@ -48,10 +48,10 @@ class LoxClass(val name: String, val superclass: LoxClass?, val methods: Map<Str
     }
 
     fun findMethod(name: String): LoxFunction? {
-        if (methods.containsKey(name)) {
-            return methods[name]
+        if (this.methods.containsKey(name)) {
+            return this.methods[name]
         }
-        return superclass?.findMethod(name)
+        return this.superclass?.findMethod(name)
     }
 
     override fun arity() = findMethod("init")?.arity() ?: 0

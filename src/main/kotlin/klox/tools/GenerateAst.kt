@@ -32,7 +32,7 @@ fun defineType(baseName: String, className: String, fieldString: String): String
     val params = fields.map { it.split(" ") }.joinToString(", ") { (type, name) -> "val $name: $type" }
     return """
     data class $className($params) : $baseName() { 
-        override fun <R> accept(visitor: Visitor<R>) = visitor.visit(this) 
+        override fun <R> accept(visitor: Visitor<R>) = visitor.visit(this)
     }""".trimMargin()
 }
 

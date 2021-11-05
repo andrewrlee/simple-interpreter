@@ -197,6 +197,5 @@ class Resolver(private val interpreter: Interpreter) : Visitor<Unit>, Stmt.Visit
         }
         scope[name.lexeme] = false
     }
-
 }
 

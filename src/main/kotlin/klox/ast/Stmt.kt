@@ -21,38 +21,38 @@ sealed class Stmt() {
     }
 
     data class Block(val statements: List<Stmt>) : Stmt() { 
-        override fun <R> accept(visitor: Visitor<R>) = visitor.visit(this) 
+        override fun <R> accept(visitor: Visitor<R>) = visitor.visit(this)
     }
 
     data class Class(val name: Token, val superclass: Expr.Variable?, val methods: List<Stmt.Function>) : Stmt() { 
-        override fun <R> accept(visitor: Visitor<R>) = visitor.visit(this) 
+        override fun <R> accept(visitor: Visitor<R>) = visitor.visit(this)
     }
 
     data class Expression(val expression: Expr) : Stmt() { 
-        override fun <R> accept(visitor: Visitor<R>) = visitor.visit(this) 
+        override fun <R> accept(visitor: Visitor<R>) = visitor.visit(this)
     }
 
     data class Function(val name: Token, val params: List<Token>, val body: List<Stmt>) : Stmt() { 
-        override fun <R> accept(visitor: Visitor<R>) = visitor.visit(this) 
+        override fun <R> accept(visitor: Visitor<R>) = visitor.visit(this)
     }
 
     data class If(val condition: Expr, val thenBranch: Stmt, val elseBranch: Stmt?) : Stmt() { 
-        override fun <R> accept(visitor: Visitor<R>) = visitor.visit(this) 
+        override fun <R> accept(visitor: Visitor<R>) = visitor.visit(this)
     }
 
     data class Print(val expression: Expr) : Stmt() { 
-        override fun <R> accept(visitor: Visitor<R>) = visitor.visit(this) 
+        override fun <R> accept(visitor: Visitor<R>) = visitor.visit(this)
     }
 
     data class Return(val keyword: Token, val value: Expr?) : Stmt() { 
-        override fun <R> accept(visitor: Visitor<R>) = visitor.visit(this) 
+        override fun <R> accept(visitor: Visitor<R>) = visitor.visit(this)
     }
 
     data class While(val condition: Expr, val body: Stmt) : Stmt() { 
-        override fun <R> accept(visitor: Visitor<R>) = visitor.visit(this) 
+        override fun <R> accept(visitor: Visitor<R>) = visitor.visit(this)
     }
 
     data class Var(val name: Token, val initializer: Expr?) : Stmt() { 
-        override fun <R> accept(visitor: Visitor<R>) = visitor.visit(this) 
+        override fun <R> accept(visitor: Visitor<R>) = visitor.visit(this)
     }
 }

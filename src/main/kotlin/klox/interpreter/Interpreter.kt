@@ -37,7 +37,7 @@ class Interpreter : Visitor<Any?>, Stmt.Visitor<Unit> {
 
     private val locals = mutableMapOf<Expr, Int>()
     private val globals = Environment()
-    var environment = globals
+    private var environment = globals
 
     init {
         globals.define("clock", object : LoxCallable {
@@ -108,7 +108,7 @@ class Interpreter : Visitor<Any?>, Stmt.Visitor<Unit> {
         return value
     }
 
-    override fun visit(expr: Expr.Super): Any? {
+    override fun visit(expr: Expr.Super): Any {
         val distance = locals[expr]!!
         val superclass = environment.getAt(distance, "super") as LoxClass
         val instance = environment.getAt(distance - 1, "this") as LoxInstance
