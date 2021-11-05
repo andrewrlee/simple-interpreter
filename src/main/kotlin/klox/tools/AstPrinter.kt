@@ -33,6 +33,8 @@ class AstPrinter : Visitor<String> {
     override fun visit(expr: Expr.Set) = parenthesize("set", expr.value)
 
     override fun visit(expr: This) = "this"
+
+    override fun visit(expr: Super) = "super"
 }
 
 fun main() {

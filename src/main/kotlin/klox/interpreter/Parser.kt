@@ -35,16 +35,19 @@ class Parser(private val tokens: List<Token>) {
 
     private fun classDeclaration(): Stmt {
         val name = consume(IDENTIFIER, "Expect class name.")
+
         val superclass = if (match(LESS)) {
             consume(IDENTIFIER, "Expect superclass name.")
             Variable(previous())
         } else null
 
         consume(LEFT_BRACE, "Expect '{' before class body.")
+
         val methods = mutableListOf<Stmt.Function>()
         while (!check(RIGHT_BRACE) && !isAtEnd()) {
             methods.add(function("method"))
         }
+
         consume(RIGHT_BRACE, "Expect '}' after class body.")
 
         return Stmt.Class(name, superclass, methods)
@@ -243,6 +246,14 @@ class Parser(private val tokens: List<Token>) {
         if (match(TRUE)) return Literal(true)
         if (match(NIL)) return Literal(null)
         if (match(NUMBER, STRING)) return Literal(previous().literal)
+
+        if (match(SUPER)) {
+            val token = previous()
+            consume(DOT, "Expect '.' after 'super'")
+            val method = consume(IDENTIFIER, "Expect superclass method name.")
+            return Super(token, method)
+        }
+
         if (match(THIS)) return This(previous())
         if (match(IDENTIFIER)) return Variable(previous())
 

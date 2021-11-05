@@ -2,7 +2,7 @@ package klox.interpreter
 
 import klox.interpreter.Interpreter.RuntimeError
 
-class Environment(private val enclosing: Environment? = null) {
+class Environment(val enclosing: Environment? = null) {
     private val values = mutableMapOf<String, Any?>()
 
     fun define(name: String, value: Any?) = values.put(name, value)

@@ -25,7 +25,7 @@ import klox.interpreter.FunctionType.METHOD
 import java.util.Stack
 
 enum class FunctionType { NONE, FUNCTION, INITIALIZER, METHOD }
-enum class ClassType { NONE, CLASS }
+enum class ClassType { NONE, CLASS, SUBCLASS }
 
 class Resolver(private val interpreter: Interpreter) : Visitor<Unit>, Stmt.Visitor<Unit> {
     private val scopes = Stack<HashMap<String, Boolean>>()
@@ -84,10 +84,14 @@ class Resolver(private val interpreter: Interpreter) : Visitor<Unit>, Stmt.Visit
         define(stmt.name)
 
         stmt.superclass?.let {
+            currentClassType = ClassType.SUBCLASS
             if (it.name.lexeme == stmt.name.lexeme) {
                 Lox.error(it.name, "A class can't inherit from itself.")
             }
             resolve(it)
+
+            beginScope()
+            scopes.peek()["super"] = true
         }
 
         beginScope()
@@ -98,8 +102,19 @@ class Resolver(private val interpreter: Interpreter) : Visitor<Unit>, Stmt.Visit
             resolveFunction(it, declaration)
         }
         endScope()
-
+        stmt.superclass?.also { endScope() }
         currentClassType = enclosingClassType
+    }
+
+    override fun visit(expr: Expr.Super) {
+        if (currentClassType ==  ClassType.NONE) {
+            Lox.error(expr.keyword, "Can't use 'super' outside of class.")
+        }
+        if (currentClassType !=  ClassType.SUBCLASS) {
+            Lox.error(expr.keyword, "Can't use 'super' inside a class with no super class.")
+        }
+
+        resolveLocal(expr, expr.keyword)
     }
 
     override fun visit(stmt: Stmt.Function) {
@@ -140,7 +155,7 @@ class Resolver(private val interpreter: Interpreter) : Visitor<Unit>, Stmt.Visit
 
 
     fun resolve(statements: List<Stmt>) = statements.forEach { resolve(it) }
-    private fun resolve(vararg statements: Stmt?) = statements.forEach { it?.accept(this) }
+        private fun resolve(vararg statements: Stmt?) = statements.forEach { it?.accept(this) }
     private fun resolve(vararg expressions: Expr?) = expressions.forEach { it?.accept(this) }
 
     private fun resolveLocal(expr: Expr, name: Token) {
