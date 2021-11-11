@@ -1,6 +1,6 @@
 package klox.interpreter
 
-import klox.Lox
+import klox.Context
 import klox.interpreter.TokenType.BANG
 import klox.interpreter.TokenType.BANG_EQUAL
 import klox.interpreter.TokenType.COMMA
@@ -25,7 +25,7 @@ import klox.interpreter.TokenType.SLASH
 import klox.interpreter.TokenType.STAR
 import klox.interpreter.TokenType.STRING
 
-class Scanner(private val source: String) {
+class Scanner(private val context: Context, private val source: String) {
     private val tokens: MutableList<Token> = mutableListOf()
     private var start = 1
     private var current = 0
@@ -64,7 +64,7 @@ class Scanner(private val source: String) {
                 when {
                     isDigit(c) -> number()
                     isAlpha(c) -> identifier()
-                    else -> Lox.error(line, "Unexpected character: $c.")
+                    else -> context.error(line, "Unexpected character: $c.")
                 }
             }
         }
@@ -90,7 +90,7 @@ class Scanner(private val source: String) {
             advance()
         }
         if (isAtEnd()) {
-            Lox.error(line, "Unterminated string.")
+            context.error(line, "Unterminated string.")
             return
         }
         advance()
@@ -109,7 +109,7 @@ class Scanner(private val source: String) {
     private fun identifier() {
         while (isAlphaNumeric(peek())) advance()
         val text = source.substring(start, current)
-        addToken(KEYWORDS.getOrDefault(text, IDENTIFIER))
+        addToken(KEYWORDS.getOrElse(text) { IDENTIFIER })
     }
 
     private fun comment() {

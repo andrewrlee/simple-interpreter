@@ -1,6 +1,6 @@
 package klox.interpreter
 
-import klox.Lox
+import klox.Context
 import klox.ast.Expr
 import klox.ast.Expr.Assign
 import klox.ast.Expr.Binary
@@ -32,7 +32,7 @@ import klox.interpreter.TokenType.PLUS
 import klox.interpreter.TokenType.SLASH
 import klox.interpreter.TokenType.STAR
 
-class Interpreter : Visitor<Any?>, Stmt.Visitor<Unit> {
+class Interpreter(val context: Context) : Visitor<Any?>, Stmt.Visitor<Unit> {
     class RuntimeError(val token: Token, message: String) : RuntimeException(message)
 
     private val locals = mutableMapOf<Expr, Int>()
@@ -41,7 +41,7 @@ class Interpreter : Visitor<Any?>, Stmt.Visitor<Unit> {
 
     init {
         globals.define("clock", object : LoxCallable {
-            override fun call(interpreter: Interpreter, args: List<Any?>) = System.currentTimeMillis() / 1000.0
+            override fun call(interpreter: Interpreter, args: List<Any?>) = context.currentTime() / 1000
             override fun arity() = 0
             override fun toString(): String = "<native fn>"
         })
@@ -50,7 +50,7 @@ class Interpreter : Visitor<Any?>, Stmt.Visitor<Unit> {
     fun interpret(stmts: List<Stmt>) = try {
         stmts.forEach { execute(it) }
     } catch (e: RuntimeError) {
-        Lox.runtimeError(e)
+        context.runtimeError(e)
     }
 
     private fun execute(stmt: Stmt) = stmt.accept(this)
@@ -112,7 +112,10 @@ class Interpreter : Visitor<Any?>, Stmt.Visitor<Unit> {
         val distance = locals[expr]!!
         val superclass = environment.getAt(distance, "super") as LoxClass
         val instance = environment.getAt(distance - 1, "this") as LoxInstance
-        val method = superclass.findMethod(expr.method.lexeme)?: throw RuntimeError(expr.method, "Undefined property '${expr.method.lexeme}'.")
+        val method = superclass.findMethod(expr.method.lexeme) ?: throw RuntimeError(
+            expr.method,
+            "Undefined property '${expr.method.lexeme}'."
+        )
         return method.bind(instance)
     }
 
@@ -137,7 +140,7 @@ class Interpreter : Visitor<Any?>, Stmt.Visitor<Unit> {
 
     override fun visit(stmt: Print) {
         val value = evaluate(stmt.expression)
-        println(stringify(value))
+        context.println(stringify(value))
     }
 
     private fun checkDouble(expr: Unary, operand: Any?, perform: (v: Double) -> Any?): Any? {
@@ -165,7 +168,7 @@ class Interpreter : Visitor<Any?>, Stmt.Visitor<Unit> {
 
     override fun visit(expr: Assign): Any? {
         val value = evaluate(expr.value)
-        val distance = locals[expr]
+        val distance = locals[expr.value] // err? this is supposed to be `expr` but doesn't work
         if (distance != null) {
             environment.assignAt(distance, expr.name, value)
         } else {

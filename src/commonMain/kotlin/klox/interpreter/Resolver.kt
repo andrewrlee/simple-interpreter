@@ -1,6 +1,6 @@
 package klox.interpreter
 
-import klox.Lox
+import klox.Context
 import klox.ast.Expr
 import klox.ast.Expr.Assign
 import klox.ast.Expr.Binary
@@ -22,13 +22,12 @@ import klox.ast.Stmt.While
 import klox.interpreter.FunctionType.FUNCTION
 import klox.interpreter.FunctionType.INITIALIZER
 import klox.interpreter.FunctionType.METHOD
-import java.util.Stack
 
 enum class FunctionType { NONE, FUNCTION, INITIALIZER, METHOD }
 enum class ClassType { NONE, CLASS, SUBCLASS }
 
-class Resolver(private val interpreter: Interpreter) : Visitor<Unit>, Stmt.Visitor<Unit> {
-    private val scopes = Stack<HashMap<String, Boolean>>()
+class Resolver(private val context: Context, private val interpreter: Interpreter) : Visitor<Unit>, Stmt.Visitor<Unit> {
+    private val scopes = stackOf<MutableMap<String, Boolean>>()
     private var currentFunctionType = FunctionType.NONE
     private var currentClassType = ClassType.NONE
 
@@ -51,7 +50,7 @@ class Resolver(private val interpreter: Interpreter) : Visitor<Unit>, Stmt.Visit
 
     override fun visit(expr: Expr.This) {
         if (currentClassType == ClassType.NONE) {
-            Lox.error(expr.keyword, "Can't refer to 'this' outside of a class.")
+            context.error(expr.keyword, "Can't refer to 'this' outside of a class.")
             return
         }
         resolveLocal(expr, expr.keyword)
@@ -59,7 +58,7 @@ class Resolver(private val interpreter: Interpreter) : Visitor<Unit>, Stmt.Visit
 
     override fun visit(expr: Variable) {
         if (!scopes.isEmpty() && scopes.peek()[expr.name.lexeme] == false) {
-            Lox.error(expr.name, "Can't read local variable in its own initialiser.")
+            context.error(expr.name, "Can't read local variable in its own initialiser.")
         }
         resolveLocal(expr, expr.name)
     }
@@ -86,7 +85,7 @@ class Resolver(private val interpreter: Interpreter) : Visitor<Unit>, Stmt.Visit
         stmt.superclass?.let {
             currentClassType = ClassType.SUBCLASS
             if (it.name.lexeme == stmt.name.lexeme) {
-                Lox.error(it.name, "A class can't inherit from itself.")
+                context.error(it.name, "A class can't inherit from itself.")
             }
             resolve(it)
 
@@ -107,11 +106,11 @@ class Resolver(private val interpreter: Interpreter) : Visitor<Unit>, Stmt.Visit
     }
 
     override fun visit(expr: Expr.Super) {
-        if (currentClassType ==  ClassType.NONE) {
-            Lox.error(expr.keyword, "Can't use 'super' outside of class.")
+        if (currentClassType == ClassType.NONE) {
+            context.error(expr.keyword, "Can't use 'super' outside of class.")
         }
-        if (currentClassType !=  ClassType.SUBCLASS) {
-            Lox.error(expr.keyword, "Can't use 'super' inside a class with no super class.")
+        if (currentClassType != ClassType.SUBCLASS) {
+            context.error(expr.keyword, "Can't use 'super' inside a class with no super class.")
         }
 
         resolveLocal(expr, expr.keyword)
@@ -132,11 +131,11 @@ class Resolver(private val interpreter: Interpreter) : Visitor<Unit>, Stmt.Visit
 
     override fun visit(stmt: Stmt.Return) {
         if (currentFunctionType == FunctionType.NONE) {
-            Lox.error(stmt.keyword, "Can't return from top level code.")
+            context.error(stmt.keyword, "Can't return from top level code.")
         }
         stmt.value?.let {
             if (currentFunctionType == INITIALIZER) {
-                Lox.error(stmt.keyword, "Can't return a value from an initializer.")
+                context.error(stmt.keyword, "Can't return a value from an initializer.")
             }
             resolve(it)
         }
@@ -155,7 +154,7 @@ class Resolver(private val interpreter: Interpreter) : Visitor<Unit>, Stmt.Visit
 
 
     fun resolve(statements: List<Stmt>) = statements.forEach { resolve(it) }
-        private fun resolve(vararg statements: Stmt?) = statements.forEach { it?.accept(this) }
+    private fun resolve(vararg statements: Stmt?) = statements.forEach { it?.accept(this) }
     private fun resolve(vararg expressions: Expr?) = expressions.forEach { it?.accept(this) }
 
     private fun resolveLocal(expr: Expr, name: Token) {
@@ -193,7 +192,7 @@ class Resolver(private val interpreter: Interpreter) : Visitor<Unit>, Stmt.Visit
         if (scopes.isEmpty()) return
         val scope = scopes.peek()
         if (scope.containsKey(name.lexeme)) {
-            Lox.error(name, "Already a variable declared with this name in this scope.")
+            context.error(name, "Already a variable declared with this name in this scope.")
         }
         scope[name.lexeme] = false
     }

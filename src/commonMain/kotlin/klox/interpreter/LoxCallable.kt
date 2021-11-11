@@ -8,7 +8,7 @@ interface LoxCallable {
     fun arity(): Int
 }
 
-class Return(val value: Any?) : RuntimeException(null, null, false, false)
+class Return(val value: Any?) : RuntimeException(/* null, null, false, false */)
 
 class LoxFunction(
     private val declaration: Stmt.Function,

@@ -1,14 +1,62 @@
 package klox.interpreter
 
-import klox.Lox
+import klox.Context
 import klox.ast.Expr
-import klox.ast.Expr.*
+import klox.ast.Expr.Assign
+import klox.ast.Expr.Binary
+import klox.ast.Expr.Call
+import klox.ast.Expr.Get
+import klox.ast.Expr.Grouping
+import klox.ast.Expr.Literal
+import klox.ast.Expr.Set
+import klox.ast.Expr.Super
+import klox.ast.Expr.This
+import klox.ast.Expr.Unary
+import klox.ast.Expr.Variable
 import klox.ast.Stmt
-import klox.interpreter.TokenType.*
+import klox.interpreter.TokenType.AND
+import klox.interpreter.TokenType.BANG
+import klox.interpreter.TokenType.BANG_EQUAL
+import klox.interpreter.TokenType.CLASS
+import klox.interpreter.TokenType.COMMA
+import klox.interpreter.TokenType.DOT
+import klox.interpreter.TokenType.ELSE
+import klox.interpreter.TokenType.EOF
+import klox.interpreter.TokenType.EQUAL
+import klox.interpreter.TokenType.EQUAL_EQUAL
+import klox.interpreter.TokenType.FALSE
+import klox.interpreter.TokenType.FOR
+import klox.interpreter.TokenType.FUN
+import klox.interpreter.TokenType.GREATER
+import klox.interpreter.TokenType.GREATER_EQUAL
+import klox.interpreter.TokenType.IDENTIFIER
+import klox.interpreter.TokenType.IF
+import klox.interpreter.TokenType.LEFT_BRACE
+import klox.interpreter.TokenType.LEFT_PAREN
+import klox.interpreter.TokenType.LESS
+import klox.interpreter.TokenType.LESS_EQUAL
+import klox.interpreter.TokenType.MINUS
+import klox.interpreter.TokenType.NIL
+import klox.interpreter.TokenType.NUMBER
+import klox.interpreter.TokenType.OR
+import klox.interpreter.TokenType.PLUS
+import klox.interpreter.TokenType.PRINT
+import klox.interpreter.TokenType.RETURN
+import klox.interpreter.TokenType.RIGHT_BRACE
+import klox.interpreter.TokenType.RIGHT_PAREN
+import klox.interpreter.TokenType.SEMICOLON
+import klox.interpreter.TokenType.SLASH
+import klox.interpreter.TokenType.STAR
+import klox.interpreter.TokenType.STRING
+import klox.interpreter.TokenType.SUPER
+import klox.interpreter.TokenType.THIS
+import klox.interpreter.TokenType.TRUE
+import klox.interpreter.TokenType.VAR
+import klox.interpreter.TokenType.WHILE
 
 class ParserError : RuntimeException()
 
-class Parser(private val tokens: List<Token>) {
+class Parser(private val context: Context, private val tokens: List<Token>) {
     private var current = 0
 
     fun parse(): List<Stmt> {
@@ -300,7 +348,7 @@ class Parser(private val tokens: List<Token>) {
         if (check(type)) advance() else throw error(peek(), message)
 
     private fun error(token: Token, message: String): ParserError {
-        Lox.error(token, message)
+        context.error(token, message)
         return ParserError()
     }
 
