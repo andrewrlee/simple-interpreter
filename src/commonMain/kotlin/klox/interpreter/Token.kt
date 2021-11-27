@@ -7,7 +7,5 @@ class Token(
     val line: Int
 ) {
 
-    override fun toString(): String {
-        return "$type $lexeme $literal"
-    }
+    override fun toString() = "$type $lexeme $literal"
 }
