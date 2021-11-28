@@ -9,15 +9,17 @@ kotlin {
     jvm {
         withJava()
     }
-    js() {
+    js {
         browser {
             commonWebpackConfig {
             }
             webpackTask {
+                destinationDirectory = File(projectDir, "./docs/")
             }
             dceTask {
-                dceOptions { devMode = true }
-//                keep("klox.klox.Lox", "klox.klox.Lox.run")
+                dceOptions {
+                    keep("klox.klox.Lox")
+                }
             }
         }
         binaries.executable()

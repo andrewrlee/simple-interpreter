@@ -38,7 +38,7 @@ class Environment(val enclosing: Environment? = null) {
     private fun ancestor(distance: Int): Environment {
         var environment = this
         var i = 0
-        while(i < distance) {
+        while (i < distance) {
             environment = environment.enclosing!!
             i++
         }

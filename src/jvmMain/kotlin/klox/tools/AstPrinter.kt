@@ -1,8 +1,18 @@
 package klox.tools
 
 import klox.ast.Expr
+import klox.ast.Expr.Assign
 import klox.ast.Expr.Binary
-import klox.ast.Expr.*
+import klox.ast.Expr.Call
+import klox.ast.Expr.Get
+import klox.ast.Expr.Grouping
+import klox.ast.Expr.Literal
+import klox.ast.Expr.Logical
+import klox.ast.Expr.Super
+import klox.ast.Expr.This
+import klox.ast.Expr.Unary
+import klox.ast.Expr.Variable
+import klox.ast.Expr.Visitor
 import klox.interpreter.Token
 import klox.interpreter.TokenType.MINUS
 import klox.interpreter.TokenType.STAR
@@ -18,7 +28,8 @@ class AstPrinter : Visitor<String> {
 
     override fun visit(expr: Unary): String = parenthesize(expr.operator.lexeme, expr.right)
 
-    private fun parenthesize(name: String, vararg exprs: Expr) = "($name ${exprs.joinToString(" ") { it.accept(this) }})"
+    private fun parenthesize(name: String, vararg exprs: Expr) =
+        "($name ${exprs.joinToString(" ") { it.accept(this) }})"
 
     override fun visit(expr: Variable) = expr.name.lexeme
 

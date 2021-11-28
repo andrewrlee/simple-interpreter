@@ -1,4 +1,5 @@
 # klox
+
 A Kotlin JVM/JS implementation of Lox from Crafting Interpreters (by `@munificentbob`)
 
 ## To generate AST
@@ -16,25 +17,31 @@ Generate language script:
 `./gradlew clean jsBrowserDistribution`
 
 Include language script in to page:
+
 ```
   <script src="./build/distributions/klox.js"></script>
 ```
 
 Create a new instance of a Lox interpreter and execute lox programs using `run()`
+
 ```js
     const handler = {
-        println: (message) => {
-            console.log(message);
-        },
-        onError: (message) => {
-            console.error(message)
-        }
+    println: (message) => {
+        console.log(message);
+    },
+    onError: (message) => {
+        console.error(message)
     }
+}
 
-    const lox = new klox.klox.Lox(handler);
+const lox = new klox.klox.Lox(handler);
 
-    lox.run("print 1 + 2");
-    
-    // Clear error flag if necessary before running again
-    lox.reset();
+lox.run("print 1 + 2");
+
+// Clear error flag if necessary before running again
+lox.reset();
 ```
+
+## In action!
+
+See the interpreter embedded in a web page [here](https://andrewrlee.github.io/klox/). 

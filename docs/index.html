@@ -1,20 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <title>Klox JS Interpreter</title>
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
-              integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-        <script src="./klox.js"></script>
+<head>
+    <title>Klox JS Interpreter</title>
+    <link href="data:," rel="icon">
+    <link crossorigin="anonymous" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" rel="stylesheet">
 
-    </head>
-    <body>
-        <div class="container">
-            <h1>Klox</h1>
-            <div id="error" class="alert alert-danger d-none" role="alert"></div>
-            <div class="row">
-                <div class="col-6">
-                    <label for="script">
-                        <textarea class="form-control" id="script" name="script" rows="20" cols="50">
+</head>
+<body>
+<div class="container">
+    <h1>Klox</h1>
+    <div class="alert alert-danger d-none" id="error" role="alert"></div>
+    <div class="row">
+        <div class="col-6">
+            <label for="script">
+                        <textarea class="form-control" cols="50" id="script" name="script" rows="20">
 
     class FibCalculator {
         fib(n) {
@@ -33,46 +33,23 @@
       print(plus10(calculator.fib(i)));
     }
                         </textarea>
-                    </label>
-                </div>
-                <div class="col-6" style="background-color:#f8f9fa;border:2px solid darkgrey">
-                    <p id="output"></p>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-4">
-                    <button class="" onclick="execute()" type="button">
-                        Run!
-                    </button>
-                </div>
-            </div>
+            </label>
         </div>
-    </body>
+        <div class="col-6" style="background-color:#f8f9fa;border:2px solid darkgrey">
+            <p id="output"></p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-4">
+            <button id="run" type="button">
+                Run!
+            </button>
+        </div>
+    </div>
+</div>
+</body>
 
-    <script>
-        const script = document.getElementById("script");
-        const output = document.getElementById('output');
-        const error =  document.getElementById('error');
-
-        const handler = {
-            println: (message) => {
-                error.classList.add("d-none");
-                error.innerHTML = "";
-                output.innerHTML += message + "<br/>";
-            },
-            onError: (message) => {
-                error.classList.remove("d-none");
-                error.innerHTML = message;
-            }
-        }
-
-        const lox = new klox.klox.Lox(handler);
-
-        const execute = () => {
-            output.innerHTML = "";
-            lox.reset();
-            lox.run(script.value);
-        }
-    </script>
+<script src="./klox.js"></script>
+<script src="./init.js" type="module"></script>
 </html>
 

@@ -43,7 +43,7 @@ ${
         val className = it.split(":")[0].trim()
         "        fun visit(${baseName.lowercase()}: $className): R"
     }
-  }
+}
     }"""
 
 fun main(args: Array<String>) {

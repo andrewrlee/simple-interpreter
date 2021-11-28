@@ -4,9 +4,9 @@ import java.io.File
 import java.nio.charset.Charset
 import kotlin.system.exitProcess
 
-val handler = object: Handler {
+val handler = object : Handler {
     override fun println(message: Any?) = kotlin.io.println(message)
-    override fun onError(message: Any?)= System.err.println(message)
+    override fun onError(message: Any?) = System.err.println(message)
 }
 
 class LoxWrapper(val lox: Lox = Lox(handler)) {
@@ -33,7 +33,7 @@ fun main(args: Array<String>) {
     val wrapper = LoxWrapper()
 
     when {
-        args.size > 1 -> println("Usage: klox [script]").also {  exitProcess(64) }
+        args.size > 1 -> println("Usage: klox [script]").also { exitProcess(64) }
         args.size == 1 -> wrapper.runFile(args[0])
         args.isEmpty() -> wrapper.runPrompt()
     }

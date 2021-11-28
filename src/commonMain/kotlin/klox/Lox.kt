@@ -1,12 +1,9 @@
 package klox
 
 import klox.interpreter.Interpreter
-import klox.interpreter.Interpreter.RuntimeError
 import klox.interpreter.Parser
 import klox.interpreter.Resolver
 import klox.interpreter.Scanner
-import klox.interpreter.Token
-import klox.interpreter.TokenType.EOF
 import kotlin.js.JsName
 
 class Lox(handler: Handler) {
