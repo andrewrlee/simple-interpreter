@@ -1,10 +1,9 @@
 pluginManagement {
     repositories {
-        google()
         gradlePluginPortal()
         mavenCentral()
     }
 }
 
-rootProject.name = 'klox'
+rootProject.name = 'simple-interpreter'
 

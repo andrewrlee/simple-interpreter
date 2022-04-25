@@ -1,8 +1,0 @@
-
-class Eclair {
-  cook(){
-     super.cook();
-  }
-}
-
-Eclair().cook();

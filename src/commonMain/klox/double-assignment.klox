@@ -1,6 +1,0 @@
-
-fun bad() {
-  var a = "Jim";
-  var a = "Bob";
-}
-

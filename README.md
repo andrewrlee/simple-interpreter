@@ -1,4 +1,4 @@
-# klox
+# simple-interpreter
 
 A Kotlin JVM/JS implementation of Lox from Crafting Interpreters (by `@munificentbob`)
 
