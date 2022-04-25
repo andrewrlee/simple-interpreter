@@ -1,47 +1,24 @@
 # simple-interpreter
 
-A Kotlin JVM/JS implementation of Lox from Crafting Interpreters (by `@munificentbob`)
+An interpreter to evaluate expressions.
 
-## To generate AST
+A vastly simplified version of my implementation of [klox](https://github.com/andrewrlee/klox)
 
-Run  `src/jvmMain/kotlin/klox/tools/GenerateAst.kt`
+```kotlin
+fun main() {
+    val tokens = Scanner().scanTokens("1 + 2 * 3 / 4")
 
-## To run via CLI
+    println(tokens)
+    // [1.0, PLUS, 2.0, STAR, 3.0, SLASH, 4.0, EOF]
 
-Run `src/jvmMain/kotlin/klox/LoxWrapper.kt` to see usage.
+    val ast = Parser().parse(tokens)
 
-## To run via a browser
+    println(AstPrinter().print(ast))
+    // (1.0 + ((2.0 * 3.0) / 4.0))
 
-Generate language script:
+    val result = Interpreter().interpret(ast)
 
-`./gradlew clean jsBrowserDistribution`
-
-Include language script in to page:
-
-```
-  <script src="./build/distributions/klox.js"></script>
-```
-
-Create a new instance of a Lox interpreter and execute lox programs using `run()`
-
-```js
-    const handler = {
-    println: (message) => {
-        console.log(message);
-    },
-    onError: (message) => {
-        console.error(message)
-    }
+    println(result)
+    // 2.5
 }
-
-const lox = new klox.klox.Lox(handler);
-
-lox.run("print 1 + 2");
-
-// Clear error flag if necessary before running again
-lox.reset();
 ```
-
-## In action!
-
-See the interpreter embedded in a web page [here](https://andrewrlee.github.io/klox/). 
