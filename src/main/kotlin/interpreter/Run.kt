@@ -13,9 +13,9 @@ fun main() {
     val ast = Parser().parse(tokens)
 
     println(AstPrinter().print(ast))
-    // (1.0 + ((2.0 * 3.0) / 4.0))
+    // 1.0 + ((2.0 * 3.0) / 4.0)
 
-    val result = Interpreter().interpret(ast)
+    val result = Interpreter().evaluate(ast)
 
     println(result)
     // 2.5

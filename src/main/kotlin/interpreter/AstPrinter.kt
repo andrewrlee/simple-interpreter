@@ -4,7 +4,7 @@ import interpreter.Expr.*
 import klox.simple.interpreter.Token.Operator
 
 class AstPrinter : Visitor<String> {
-    fun print(expression: Expr) = expression.accept(this)
+    fun print(expression: Expr) = expression.accept(this).let { it.subSequence(1, it.length) }
 
     override fun visit(expr: Binary): String {
         val left = expr.left.accept(this)

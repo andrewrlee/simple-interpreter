@@ -7,7 +7,8 @@ import interpreter.Expr.Literal
 import interpreter.Expr.Visitor
 
 class Interpreter : Visitor<Any> {
-    fun interpret(expr: Expr): Any = expr.accept(this)
+
+    fun evaluate(expression: Expr) = expression.accept(this)
 
     override fun visit(expr: Binary): Any {
         val left = evaluate(expr.left) as Double
@@ -22,7 +23,4 @@ class Interpreter : Visitor<Any> {
     }
 
     override fun visit(expr: Literal) = expr.value
-
-    private fun evaluate(expression: Expr) = expression.accept(this)
-
 }
