@@ -6,13 +6,13 @@ import interpreter.Expr.Binary
 import interpreter.Expr.Literal
 import interpreter.Expr.Visitor
 
-class Interpreter : Visitor<Any> {
+class Interpreter : Visitor<Double> {
 
     fun evaluate(expression: Expr) = expression.accept(this)
 
-    override fun visit(expr: Binary): Any {
-        val left = evaluate(expr.left) as Double
-        val right = evaluate(expr.right) as Double
+    override fun visit(expr: Binary): Double {
+        val left = evaluate(expr.left)
+        val right = evaluate(expr.right)
         return when (expr.operator) {
             MINUS -> left - right
             SLASH -> left / right
